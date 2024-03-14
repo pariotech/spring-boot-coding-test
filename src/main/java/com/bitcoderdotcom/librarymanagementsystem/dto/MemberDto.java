@@ -1,10 +1,31 @@
 package com.bitcoderdotcom.librarymanagementsystem.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.bitcoderdotcom.librarymanagementsystem.constant.Roles;
+import lombok.*;
 
-@Getter
+import java.util.List;
+
 @Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class MemberDto {
 
+    private String name;
+    private String email;
+    private String password;
+    private Roles roles;
+    private List<Long> bookIds;
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Response {
+
+        private Long id;
+        private String name;
+        private String email;
+        private Roles roles;
+        private List<Long> bookIds;
+    }
 }

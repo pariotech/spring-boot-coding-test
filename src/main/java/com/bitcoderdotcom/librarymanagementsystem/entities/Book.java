@@ -23,4 +23,7 @@ public class Book {
     @Enumerated(EnumType.STRING)
     private Genre genre;
     private long quantity;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }
