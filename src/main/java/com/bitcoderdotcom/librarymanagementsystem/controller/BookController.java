@@ -18,13 +18,13 @@ public class BookController {
 
     private final BookService bookService;
 
-    @PostMapping("/create")
+    @PostMapping("/add-book-to-shelve")
     public ResponseEntity<ApiResponse<BookDto.Response>> insertBookIntoShelve(@RequestBody BookDto bookDto, Principal principal) {
         return bookService.insertBookIntoShelve(bookDto, principal);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<BookDto.Response>> getBookById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<BookDto.Response>> getBookById(@PathVariable String id) {
         return bookService.getBookById(id);
     }
 
@@ -41,8 +41,14 @@ public class BookController {
         return bookService.searchBooks(title, author, genre);
     }
 
+    @PatchMapping("/{bookId}")
+    public ResponseEntity<ApiResponse<BookDto.Response>> updateBookDetails(@PathVariable String bookId, @RequestBody BookDto bookDto, Principal principal) {
+        return bookService.updateBookDetails(bookId, bookDto, principal);
+    }
+
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<String>> removeBookFromShelve(@PathVariable Long id, Principal principal) {
+    public ResponseEntity<ApiResponse<String>> removeBookFromShelve(@PathVariable String id, Principal principal) {
         return bookService.removeBookFromShelve(id, principal);
     }
 }

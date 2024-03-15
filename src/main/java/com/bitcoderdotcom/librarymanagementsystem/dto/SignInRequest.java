@@ -22,14 +22,14 @@ public class SignInRequest {
     @Getter
     @Setter
     public static class Response {
-        private Long userId;
+        private String userId;
         private String token;
         private String type = "Bearer";
         private String name;
         private Set<Roles> roles;
         private LocalDateTime tokenExpirationDate;
 
-        public Response(Long userId, String token, String name, Set<Roles> roles, LocalDateTime tokenExpirationDate) {
+        public Response(String userId, String token, String name, Set<Roles> roles, LocalDateTime tokenExpirationDate) {
             this.userId = userId;
             this.token = token;
             this.name = name;

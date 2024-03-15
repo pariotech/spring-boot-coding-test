@@ -5,8 +5,9 @@ import com.bitcoderdotcom.librarymanagementsystem.constant.Genre;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
 @ToString
@@ -15,15 +16,22 @@ import lombok.*;
 public class Book {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
     private String title;
     private String author;
-    private String ISBN;
+    private String isbn;
     @Enumerated(EnumType.STRING)
     private Genre genre;
     private long quantity;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    public Book() {
+        this.setId(generateCustomUUID());
+    }
+
+    private String generateCustomUUID() {
+        return "Book"+ UUID.randomUUID().toString().substring(0, 5);
+    }
 }

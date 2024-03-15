@@ -11,23 +11,22 @@ public class BookDto {
 
     private String title;
     private String author;
-    private String ISBN;
+    private String isbn;
     private Genre genre;
     private long quantity;
-    private String userId;
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Response {
 
-        private Long id;
+        private String id;
         private String title;
         private String author;
-        private String ISBN;
+        private String isbn;
         private Genre genre;
         private long quantity;
-        private String userId;
     }
 }
+
 

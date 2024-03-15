@@ -11,8 +11,10 @@ import java.util.List;
 public interface BookService {
 
     ResponseEntity<ApiResponse<BookDto.Response>> insertBookIntoShelve(BookDto bookDto, Principal principal);
-    ResponseEntity<ApiResponse<BookDto.Response>> getBookById(Long id);
+    ResponseEntity<ApiResponse<BookDto.Response>> getBookById(String id);
     ResponseEntity<ApiResponse<List<BookDto.Response>>> getAllBooks(Principal principal);
     ResponseEntity<ApiResponse<List<BookDto.Response>>> searchBooks(String title, String author, Genre genre);
-    ResponseEntity<ApiResponse<String>> removeBookFromShelve(Long id, Principal principal);
+    ResponseEntity<ApiResponse<BookDto.Response>> updateBookDetails(String bookId, BookDto bookDto, Principal principal);
+    ResponseEntity<ApiResponse<List<BookDto.Response>>> getBooksByLibrarianId(String librarianId, Principal principal);
+    ResponseEntity<ApiResponse<String>> removeBookFromShelve(String id, Principal principal);
 }

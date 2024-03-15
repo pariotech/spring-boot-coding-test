@@ -7,10 +7,10 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 @SuperBuilder
 @DynamicUpdate
 @Entity
@@ -23,11 +23,20 @@ import java.io.Serializable;
 public abstract class User implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
     private String name;
     private String email;
     private String password;
     @Enumerated(EnumType.STRING)
     private Roles roles;
+
+
+    public User() {
+        super();
+        this.setId(generateCustomUUID());
+    }
+
+    private String generateCustomUUID() {
+        return "User"+ UUID.randomUUID().toString().substring(0, 5);
+    }
 }

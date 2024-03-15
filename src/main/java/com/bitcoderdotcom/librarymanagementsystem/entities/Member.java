@@ -9,15 +9,24 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "members")
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
 public class Member extends User{
 
     @OneToMany(mappedBy = "user")
     private List<Book> books;
+
+    public Member() {
+        super();
+        this.setId(generateCustomUUID());
+    }
+
+    private String generateCustomUUID() {
+        return "Mem"+ UUID.randomUUID().toString().substring(0, 5);
+    }
 }

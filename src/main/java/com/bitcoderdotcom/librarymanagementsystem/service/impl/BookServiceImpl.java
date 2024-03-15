@@ -14,8 +14,12 @@ import com.bitcoderdotcom.librarymanagementsystem.service.BookService;
 import jakarta.persistence.criteria.Predicate;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import java.beans.FeatureDescriptor;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -23,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -34,11 +39,11 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public ResponseEntity<ApiResponse<BookDto.Response>> insertBookIntoShelve(BookDto bookDto, Principal principal) {
-        log.info("Creating book with title: {}", bookDto.getTitle());
+        log.info("Inserting book with title: {}", bookDto.getTitle());
         User user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", principal.getName()));
         if (user.getRoles() != Roles.LIBRARIAN) {
-            throw new UnauthorizedException("Only a Librarian can create a book");
+            throw new UnauthorizedException("Only a Librarian can insert a book");
         }
         Book book = convertDtoToEntity(bookDto, user);
         bookRepository.save(book);
@@ -47,15 +52,15 @@ public class BookServiceImpl implements BookService {
                 LocalDateTime.now(),
                 UUID.randomUUID().toString(),
                 true,
-                "Book created successfully",
+                "Book inserted successfully to "+ bookDto.getGenre()+ " shelve by "+ user.getName(),
                 bookResponse
         );
-        log.info("Book created successfully with title: {}", bookDto.getTitle());
+        log.info("Book inserted successfully with title: {}", bookDto.getTitle());
         return ResponseEntity.ok(apiResponse);
     }
 
     @Override
-    public ResponseEntity<ApiResponse<BookDto.Response>> getBookById(Long id) {
+    public ResponseEntity<ApiResponse<BookDto.Response>> getBookById(String id) {
         log.info("Fetching book with id: {}", id);
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book", "id", id));
@@ -124,8 +129,57 @@ public class BookServiceImpl implements BookService {
         return ResponseEntity.ok(apiResponse);
     }
 
+
     @Override
-    public ResponseEntity<ApiResponse<String>> removeBookFromShelve(Long id, Principal principal) {
+    public ResponseEntity<ApiResponse<BookDto.Response>> updateBookDetails(String bookId, BookDto bookDto, Principal principal) {
+        log.info("Updating book details for book id: {}", bookId);
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", principal.getName()));
+        if (user.getRoles() != Roles.LIBRARIAN) {
+            throw new UnauthorizedException("Only a Librarian can update book details");
+        }
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResourceNotFoundException("Book", "id", bookId));
+        BeanUtils.copyProperties(bookDto, book, getNullPropertyNames(bookDto));
+        bookRepository.save(book);
+        BookDto.Response bookResponse = convertEntityToDto(book);
+        ApiResponse<BookDto.Response> apiResponse = new ApiResponse<>(
+                LocalDateTime.now(),
+                UUID.randomUUID().toString(),
+                true,
+                "Book details updated successfully",
+                bookResponse
+        );
+        log.info("Book details updated successfully for book id: {}", bookId);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<List<BookDto.Response>>> getBooksByLibrarianId(String librarianId, Principal principal) {
+        log.info("Fetching all books inserted by librarian with id: {}", librarianId);
+        User user = userRepository.findById(librarianId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", librarianId));
+        if (user.getRoles() != Roles.LIBRARIAN) {
+            throw new UnauthorizedException("Only a Librarian can insert a book");
+        }
+        List<Book> books = bookRepository.findByUser(user);
+        List<BookDto.Response> bookResponses = books.stream()
+                .map(this::convertEntityToDto)
+                .collect(Collectors.toList());
+        ApiResponse<List<BookDto.Response>> apiResponse = new ApiResponse<>(
+                LocalDateTime.now(),
+                UUID.randomUUID().toString(),
+                true,
+                "Books inserted by librarian with id " + librarianId + " fetched successfully",
+                bookResponses
+        );
+        log.info("Books inserted by librarian with id {} fetched successfully", librarianId);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
+    @Override
+    public ResponseEntity<ApiResponse<String>> removeBookFromShelve(String id, Principal principal) {
         log.info("Removing book with id: {}", id);
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book", "id", id));
@@ -149,21 +203,29 @@ public class BookServiceImpl implements BookService {
         bookResponse.setId(book.getId());
         bookResponse.setTitle(book.getTitle());
         bookResponse.setAuthor(book.getAuthor());
-        bookResponse.setISBN(book.getISBN());
+        bookResponse.setIsbn(book.getIsbn());
         bookResponse.setGenre(book.getGenre());
         bookResponse.setQuantity(book.getQuantity());
-        bookResponse.setUserId(book.getUser().getId().toString());
         return bookResponse;
     }
+
 
     private Book convertDtoToEntity(BookDto bookDto, User user) {
         Book book = new Book();
         book.setTitle(bookDto.getTitle());
         book.setAuthor(bookDto.getAuthor());
-        book.setISBN(bookDto.getISBN());
+        book.setIsbn(bookDto.getIsbn());
         book.setGenre(bookDto.getGenre());
         book.setQuantity(bookDto.getQuantity());
         book.setUser(user);
         return book;
+    }
+
+    private String[] getNullPropertyNames(Object source) {
+        final BeanWrapper wrappedSource = new BeanWrapperImpl(source);
+        return Stream.of(wrappedSource.getPropertyDescriptors())
+                .map(FeatureDescriptor::getName)
+                .filter(propertyName -> wrappedSource.getPropertyValue(propertyName) == null)
+                .toArray(String[]::new);
     }
 }

@@ -21,7 +21,7 @@ import java.util.Objects;
 public class UserDetailsImpl implements UserDetails {
 
     private static final long serialVersionUID = 1L;
-    private Long id;
+    private String id;
     private String name;
     private String email;
     @JsonIgnore
@@ -29,7 +29,7 @@ public class UserDetailsImpl implements UserDetails {
     private Collection<? extends GrantedAuthority> authorities;
 
     public UserDetailsImpl(
-            Long id, String email, String password,
+            String id, String email, String password,
             List<GrantedAuthority> authorities) {
         this.id = id;
         this.name = email;
@@ -71,7 +71,7 @@ public class UserDetailsImpl implements UserDetails {
         return authorities;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
