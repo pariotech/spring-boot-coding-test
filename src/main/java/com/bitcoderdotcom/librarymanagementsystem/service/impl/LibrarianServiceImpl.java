@@ -3,8 +3,10 @@ package com.bitcoderdotcom.librarymanagementsystem.service.impl;
 import com.bitcoderdotcom.librarymanagementsystem.constant.Roles;
 import com.bitcoderdotcom.librarymanagementsystem.dto.ApiResponse;
 import com.bitcoderdotcom.librarymanagementsystem.dto.LibrarianDto;
+import com.bitcoderdotcom.librarymanagementsystem.dto.MemberDto;
 import com.bitcoderdotcom.librarymanagementsystem.entities.Book;
 import com.bitcoderdotcom.librarymanagementsystem.entities.Librarian;
+import com.bitcoderdotcom.librarymanagementsystem.entities.Member;
 import com.bitcoderdotcom.librarymanagementsystem.entities.User;
 import com.bitcoderdotcom.librarymanagementsystem.exception.ResourceNotFoundException;
 import com.bitcoderdotcom.librarymanagementsystem.exception.UnauthorizedException;
@@ -55,10 +57,14 @@ public class LibrarianServiceImpl implements LibrarianService {
         User user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", principal.getName()));
         if (user.getRoles() != Roles.LIBRARIAN) {
-            throw new UnauthorizedException("Only a Librarian can update their details");
+            throw new UnauthorizedException("Only a librarian can update their details");
         }
-        user.setEmail(librarianDto.getEmail());
-        user.setPassword(passwordEncoder.encode(librarianDto.getPassword()));
+        if (librarianDto.getEmail() != null && !librarianDto.getEmail().isEmpty()) {
+            user.setEmail(librarianDto.getEmail());
+        }
+        if (librarianDto.getPassword() != null && !librarianDto.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(librarianDto.getPassword()));
+        }
         userRepository.save(user);
         LibrarianDto.Response librarianResponse = convertEntityToDto((Librarian) user);
         ApiResponse<LibrarianDto.Response> apiResponse = new ApiResponse<>(

@@ -21,6 +21,11 @@ public class Member extends User{
     @OneToMany(mappedBy = "user")
     private List<Book> books;
 
+    @OneToMany(mappedBy = "member")
+    private List<Borrow> borrows;
+
+    private boolean withBorrowedBook = false;
+
     public Member() {
         super();
         this.setId(generateCustomUUID());

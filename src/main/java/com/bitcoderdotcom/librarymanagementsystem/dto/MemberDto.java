@@ -26,6 +26,7 @@ public class MemberDto {
         private String name;
         private String email;
         private Roles roles;
+        private boolean withBorrowedBook;
         private List<String> bookIds;
     }
 }

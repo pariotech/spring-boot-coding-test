@@ -5,6 +5,7 @@ import com.bitcoderdotcom.librarymanagementsystem.constant.Genre;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -23,9 +24,13 @@ public class Book {
     @Enumerated(EnumType.STRING)
     private Genre genre;
     private long quantity;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(mappedBy = "book")
+    private List<Borrow> borrows;
 
     public Book() {
         this.setId(generateCustomUUID());

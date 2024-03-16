@@ -5,10 +5,13 @@ import com.bitcoderdotcom.librarymanagementsystem.constant.Roles;
 import com.bitcoderdotcom.librarymanagementsystem.dto.ApiResponse;
 import com.bitcoderdotcom.librarymanagementsystem.dto.BookDto;
 import com.bitcoderdotcom.librarymanagementsystem.entities.Book;
+import com.bitcoderdotcom.librarymanagementsystem.entities.Borrow;
 import com.bitcoderdotcom.librarymanagementsystem.entities.User;
+import com.bitcoderdotcom.librarymanagementsystem.exception.BadRequestException;
 import com.bitcoderdotcom.librarymanagementsystem.exception.ResourceNotFoundException;
 import com.bitcoderdotcom.librarymanagementsystem.exception.UnauthorizedException;
 import com.bitcoderdotcom.librarymanagementsystem.repository.BookRepository;
+import com.bitcoderdotcom.librarymanagementsystem.repository.BorrowRepository;
 import com.bitcoderdotcom.librarymanagementsystem.repository.UserRepository;
 import com.bitcoderdotcom.librarymanagementsystem.service.BookService;
 import jakarta.persistence.criteria.Predicate;
@@ -36,6 +39,7 @@ public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final BorrowRepository borrowRepository;
 
     @Override
     public ResponseEntity<ApiResponse<BookDto.Response>> insertBookIntoShelve(BookDto bookDto, Principal principal) {
@@ -177,26 +181,44 @@ public class BookServiceImpl implements BookService {
         return ResponseEntity.ok(apiResponse);
     }
 
-
     @Override
     public ResponseEntity<ApiResponse<String>> removeBookFromShelve(String id, Principal principal) {
         log.info("Removing book with id: {}", id);
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Book", "id", id));
-        if (!book.getUser().getEmail().equals(principal.getName())) {
-            throw new UnauthorizedException("You are not authorized to perform this operation");
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", principal.getName()));
+        // Check if the user is a LIBRARIAN
+        if (user.getRoles() != Roles.LIBRARIAN) {
+            throw new UnauthorizedException("Only a LIBRARIAN can remove a book");
         }
+
+        // Check if the book has been returned
+        List<Borrow> borrows = borrowRepository.findByBookId(id);
+        for (Borrow borrow : borrows) {
+            if (borrow.getReturnedAt() == null) {
+                throw new BadRequestException("The book has not been returned yet");
+            }
+        }
+
+        // Delete the Borrow records
+        for (Borrow borrow : borrows) {
+            borrowRepository.delete(borrow);
+        }
+
         bookRepository.delete(book);
+
         ApiResponse<String> apiResponse = new ApiResponse<>(
                 LocalDateTime.now(),
                 UUID.randomUUID().toString(),
                 true,
                 "Book removed successfully",
-                "Book with id " + id + " removed."
+                "Book with id " + id + " removed by "+ user.getName() + "."
         );
         log.info("Book removed successfully with id: {}", id);
         return ResponseEntity.ok(apiResponse);
     }
+
 
     private BookDto.Response convertEntityToDto(Book book) {
         BookDto.Response bookResponse = new BookDto.Response();
