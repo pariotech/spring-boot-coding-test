@@ -1,49 +1,58 @@
-# Library Management System Coding Assignment
+
+# Library Management System
 
 ## Description
 
-You are tasked with building a simple Library Management System using Java Spring Boot. The system should allow librarians to manage books and users.
+This is a Library Management System built with Spring Boot. It provides a set of RESTful APIs for managing books, borrows, librarians, and members. The system allows members to borrow and return books, while librarians can manage the books in the library and track borrowed books.
 
-## Requirements
+## Features
 
-1. **User Management:**
-   - Implement basic CRUD operations for users (Librarians and Members).
-   - Users should have at least the following attributes: `id`, `name`, `email`, `role`.
+- **Book Management**: The system provides APIs for managing books in the library. Librarians can add books to the library, get details of a book, list all books, search for books by title, author, or genre, update the details of a book, get a list of books managed by a specific librarian, and remove books from the library.
 
-2. **Book Management:**
-   - Implement basic CRUD operations for books.
-   - Each book should have attributes such as `id`, `title`, `author`, `ISBN`, `genre`, and `quantity`.
+- **Borrow Management**: Members can borrow and return books through the system. The system keeps track of all borrowed books, including who borrowed them and when they were borrowed. Librarians can view a list of all borrowed books.
 
-3. **Borrowing System:**
-   - Users should be able to borrow books.
-   - Users should be able to return books.
-   - Implement a mechanism to track who borrowed which book and when.
+- **Librarian Management**: The system provides APIs for managing librarians. You can get the details of a librarian, list all librarians, remove a librarian, and update the details of a librarian.
 
-4. **Validation:**
-   - Implement appropriate validation to ensure data integrity. For example, ensure that a book cannot have a negative quantity, and users cannot borrow more books than available in stock.
+- **Member Management**: The system provides APIs for managing members. You can get the details of a member, list all members, update the details of a member, and remove a member.
 
-5. **Security:**
-   - Implement basic authentication and authorization using Spring Security.
-   - Librarians should have access to all functionalities.
-   - Members should only have access to borrowing and returning books functionalities.
+- **Authentication**: The system provides APIs for user registration and sign-in.
 
-6. **Documentation:**
-   - Include proper documentation for your code (Javadoc comments).
-   - Write a README file explaining how to run the application, any assumptions made, and any additional notes.
+## Setup
 
-7. **Testing:**
-   - Write unit tests to cover critical parts of your code, especially for validation and business logic.
+The application uses an in-memory H2 database for simplicity. The configuration for the database is as follows:
 
-## Additional Notes
+```properties
+spring.application.name=LibraryManagementSystem
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+spring.datasource.url=jdbc:h2:mem:lmstestdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+```
 
-- Use Spring Boot to set up the project.
-- Use an in-memory database such as H2 for simplicity.
-- Utilize RESTful APIs for handling CRUD operations.
-- Keep the project structure clean and organized.
-- Pay attention to naming conventions and code readability.
-- Bonus points for implementing additional features like search functionality for books, pagination, etc.
+To start the application, run the following command in the root directory of the project:
 
-## Submission
+```./mvnw spring-boot:run```
 
-- fork his poject and make request o mee o a branch of labelled by your "firsname-lastname".
-- Include any necessary instructions to run the application.
+This will start the application on port 8080.
+
+ ## Usage
+The application provides several RESTful APIs for managing the library. Here are some examples:
+
+
+## API Documentation
+
+Detailed API documentation is available on Postman. You can access it here: https://documenter.getpostman.com/view/25585012/2sA2xnxph1
+
+# Testing
+The application includes unit tests for the service layer. These tests cover various scenarios and edge cases to ensure the application behaves as expected. To run the tests, use the following command:
+
+```./mvnw test```
+
+# Contributing
+Contributions are welcome! Please feel free to submit a pull request. If you find any bugs or have suggestions for improvements, please open an issue.
+
+# License
+This project is licensed under the terms of the MIT license.
