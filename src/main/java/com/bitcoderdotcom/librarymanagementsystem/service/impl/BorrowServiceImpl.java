@@ -52,11 +52,7 @@ public class BorrowServiceImpl implements BorrowService {
         }
         log.info("Member has correct role");
         if (member.isWithBorrowedBook()) {
-            try {
                 throw new BadRequestException("You must return the borrowed book before borrowing another one");
-            } catch (BadRequestException e) {
-                throw new RuntimeException(e);
-            }
         }
         log.info("Member has no borrowed books");
         Book book = bookRepository.findById(bookId)
@@ -64,11 +60,7 @@ public class BorrowServiceImpl implements BorrowService {
         log.info("Found book with ID: {}", bookId);
 
         if (book.getQuantity() <= 0) {
-            try {
                 throw new BadRequestException("This book is currently out of stock");
-            } catch (BadRequestException e) {
-                throw new RuntimeException(e);
-            }
         }
         log.info("Book is in stock");
 
@@ -110,11 +102,7 @@ public class BorrowServiceImpl implements BorrowService {
             throw new UnauthorizedException("You can only return books that you have borrowed");
         }
         if (borrow.getReturnedAt() != null) {
-            try {
                 throw new BadRequestException("This book has already been returned");
-            } catch (BadRequestException e) {
-                throw new RuntimeException(e);
-            }
         }
         borrow.setReturnedAt(LocalDateTime.now());
         borrowRepository.save(borrow);

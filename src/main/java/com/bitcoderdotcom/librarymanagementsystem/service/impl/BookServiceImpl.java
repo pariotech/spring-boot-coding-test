@@ -20,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.beans.FeatureDescriptor;
@@ -81,18 +83,16 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<List<BookDto.Response>>> getAllBooks(Principal principal) {
+    public ResponseEntity<ApiResponse<Page<BookDto.Response>>> getAllBooks(Principal principal, Pageable pageable) {
         log.info("Fetching all books");
         User user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", principal.getName()));
         if (user.getRoles() != Roles.LIBRARIAN) {
             throw new UnauthorizedException("Only a Librarian can fetch all books");
         }
-        List<Book> books = bookRepository.findAll();
-        List<BookDto.Response> bookResponses = books.stream()
-                .map(this::convertEntityToDto)
-                .collect(Collectors.toList());
-        ApiResponse<List<BookDto.Response>> apiResponse = new ApiResponse<>(
+        Page<Book> books = bookRepository.findAll(pageable);
+        Page<BookDto.Response> bookResponses = books.map(this::convertEntityToDto);
+        ApiResponse<Page<BookDto.Response>> apiResponse = new ApiResponse<>(
                 LocalDateTime.now(),
                 UUID.randomUUID().toString(),
                 true,
@@ -102,6 +102,7 @@ public class BookServiceImpl implements BookService {
         log.info("All books fetched successfully");
         return ResponseEntity.ok(apiResponse);
     }
+
 
     @Override
     public ResponseEntity<ApiResponse<List<BookDto.Response>>> searchBooks(String title, String author, Genre genre) {
